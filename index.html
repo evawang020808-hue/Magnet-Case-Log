@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account Case Study — Learning Log</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f7f7f5;
+    --bg-tertiary: #f0eeea;
+    --bg-info: #e6f1fb;
+    --bg-success: #eaf3de;
+    --bg-warning: #faeeda;
+    --bg-danger: #fcebeb;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-tertiary: #9a9a9a;
+    --text-info: #185fa5;
+    --text-success: #3b6d11;
+    --text-warning: #854f0b;
+    --text-danger: #a32d2d;
+    --border: rgba(0,0,0,0.12);
+    --border-med: rgba(0,0,0,0.22);
+    --border-strong: rgba(0,0,0,0.35);
+    --border-info: #85b7eb;
+    --border-success: #97c459;
+    --border-warning: #ef9f27;
+    --border-danger: #f09595;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --accent: #1F4E79;
+    --accent2: #2E75B6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e1e;
+      --bg-secondary: #272727;
+      --bg-tertiary: #303030;
+      --bg-info: #0c2d4a;
+      --bg-success: #173404;
+      --bg-warning: #412402;
+      --bg-danger: #501313;
+      --text: #e8e8e8;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #666;
+      --text-info: #85b7eb;
+      --text-success: #97c459;
+      --text-warning: #fac775;
+      --text-danger: #f09595;
+      --border: rgba(255,255,255,0.1);
+      --border-med: rgba(255,255,255,0.18);
+      --border-strong: rgba(255,255,255,0.28);
+      --border-info: #185fa5;
+      --border-success: #3b6d11;
+      --border-warning: #854f0b;
+      --border-danger: #a32d2d;
+      --accent: #85b7eb;
+      --accent2: #b5d4f4;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body { font-family: var(--font); background: var(--bg-tertiary); color: var(--text); min-height: 100vh; }
+
+  /* ── LAYOUT ── */
+  .shell { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── INDEX ── */
+  .index-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 2rem; }
+  .index-header h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .index-header p { font-size: 13px; color: var(--text-secondary); }
+  .btn-primary { font-family: var(--font); font-size: 13px; font-weight: 500; padding: 9px 18px; border-radius: var(--radius); cursor: pointer; background: var(--accent); color: #fff; border: none; transition: opacity 0.15s; white-space: nowrap; }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .empty-state { text-align: center; padding: 4rem 2rem; border: 1px dashed var(--border-med); border-radius: var(--radius-lg); background: var(--bg); }
+  .empty-state h2 { font-size: 16px; font-weight: 500; margin-bottom: 8px; }
+  .empty-state p { font-size: 13px; color: var(--text-secondary); }
+
+  .cs-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.12s, box-shadow 0.12s; }
+  .cs-card:hover { border-color: var(--border-strong); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .cs-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .cs-card-name { font-size: 15px; font-weight: 600; }
+  .cs-card-meta { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+  .cs-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-sm { font-family: var(--font); font-size: 12px; padding: 4px 10px; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--border-med); background: var(--bg); color: var(--text-secondary); transition: all 0.12s; }
+  .btn-sm:hover { border-color: var(--border-strong); color: var(--text); }
+  .btn-sm.danger:hover { border-color: var(--border-danger); color: var(--text-danger); background: var(--bg-danger); }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+  .ctag { font-size: 11px; padding: 2px 8px; border-radius: 100px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); }
+  .ctag.info { background: var(--bg-info); color: var(--text-info); border-color: var(--border-info); }
+  .ctag.warn { background: var(--bg-warning); color: var(--text-warning); border-color: var(--border-warning); }
+
+  /* ── FORM TOPBAR ── */
+  .form-topbar { background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; padding: 12px 1.5rem; display: flex; align-items: center; gap: 12px; }
+  .btn-back { font-family: var(--font); font-size: 13px; padding: 7px 12px; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--border-med); background: var(--bg); color: var(--text-secondary); transition: all 0.12s; white-space: nowrap; }
+  .btn-back:hover { border-color: var(--border-strong); color: var(--text); }
+  .form-company-input { font-family: var(--font); font-size: 17px; font-weight: 600; border: none; background: transparent; color: var(--text); flex: 1; min-width: 0; }
+  .form-company-input:focus { outline: none; }
+  .form-company-input::placeholder { color: var(--text-tertiary); font-weight: 400; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .save-status { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+  .save-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-warning); flex-shrink: 0; }
+  .save-dot.saved { background: #639922; }
+  .btn-outline { font-family: var(--font); font-size: 13px; padding: 7px 14px; border-radius: var(--radius); cursor: pointer; border: 1px solid var(--border-med); background: var(--bg); color: var(--text-secondary); transition: all 0.12s; }
+  .btn-outline:hover { border-color: var(--border-strong); color: var(--text); }
+  .btn-save { font-family: var(--font); font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: var(--radius); cursor: pointer; background: var(--accent); color: #fff; border: none; transition: opacity 0.15s; }
+  .btn-save:hover { opacity: 0.85; }
+
+  /* ── FORM BODY ── */
+  .form-body { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .section { margin-bottom: 2.2rem; }
+  .section-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row.thirds { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--text-secondary); }
+  .field input, .field select, .field textarea {
+    font-family: var(--font); font-size: 13px;
+    background: var(--bg); border: 1px solid var(--border-med);
+    border-radius: var(--radius); padding: 8px 10px;
+    color: var(--text); width: 100%; transition: border-color 0.15s; resize: vertical;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(46,117,182,0.1); }
+  .field textarea { min-height: 68px; line-height: 1.65; }
+  .field textarea.short { min-height: 52px; }
+  .field textarea.tall { min-height: 90px; }
+
+  .tag-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .tag { font-size: 12px; padding: 5px 11px; border-radius: 100px; border: 1px solid var(--border-med); cursor: pointer; background: var(--bg); color: var(--text-secondary); transition: all 0.12s; user-select: none; font-family: var(--font); }
+  .tag:hover { border-color: var(--border-strong); }
+  .tag.active { background: var(--bg-info); color: var(--text-info); border-color: var(--border-info); }
+
+  .stage-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .stage-pill { font-size: 12px; padding: 6px 13px; border-radius: 100px; border: 1px solid var(--border-med); cursor: pointer; background: var(--bg); color: var(--text-secondary); transition: all 0.12s; user-select: none; font-family: var(--font); }
+  .stage-pill:hover { border-color: var(--border-strong); }
+  .stage-pill.active { background: var(--bg-info); color: var(--text-info); border-color: var(--border-info); font-weight: 500; }
+
+  .spec-col-labels { display: grid; grid-template-columns: 1fr 1fr 1fr 30px; gap: 8px; margin-bottom: 5px; padding: 0 2px; }
+  .col-header { font-size: 11px; color: var(--text-secondary); }
+  .spec-row { display: grid; grid-template-columns: 1fr 1fr 1fr 30px; gap: 8px; align-items: end; margin-bottom: 8px; }
+  .spec-row .field { margin: 0; }
+
+  .remove-btn { width: 30px; height: 34px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); cursor: pointer; font-size: 15px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: all 0.12s; flex-shrink: 0; font-family: var(--font); line-height: 1; }
+  .remove-btn:hover { border-color: var(--border-danger); color: var(--text-danger); background: var(--bg-danger); }
+
+  .add-btn { font-size: 12px; color: var(--text-secondary); background: none; border: 1px dashed var(--border-med); border-radius: var(--radius); padding: 7px 14px; cursor: pointer; font-family: var(--font); width: 100%; text-align: left; transition: all 0.12s; margin-top: 4px; }
+  .add-btn:hover { border-color: var(--border-strong); color: var(--text); }
+
+  .flag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .flag-item { display: flex; align-items: flex-start; gap: 9px; padding: 9px 11px; border-radius: var(--radius); border: 1px solid var(--border); cursor: pointer; transition: all 0.12s; background: var(--bg); }
+  .flag-item:hover { border-color: var(--border-med); }
+  .flag-item.flagged { background: var(--bg-warning); border-color: var(--border-warning); }
+  .flag-item.flagged .flag-text { color: var(--text-warning); }
+  .flag-check { width: 15px; height: 15px; border-radius: 4px; border: 1px solid var(--border-med); flex-shrink: 0; margin-top: 1px; background: var(--bg); display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+  .flag-item.flagged .flag-check { background: var(--text-warning); border-color: var(--text-warning); }
+  .flag-check::after { content: ''; width: 8px; height: 5px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg) translateY(-1px); display: none; }
+  .flag-item.flagged .flag-check::after { display: block; }
+  .flag-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+  .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .score-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 10px 12px; text-align: center; }
+  .score-label { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .score-val { display: flex; justify-content: center; gap: 3px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--border-med); background: var(--bg); cursor: pointer; transition: all 0.1s; }
+  .dot:hover { border-color: var(--border-strong); }
+  .dot.filled { background: var(--accent2); border-color: var(--accent2); }
+
+  .insight-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 10px 13px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; }
+  .insight-num { font-size: 11px; font-weight: 600; color: var(--text-secondary); min-width: 20px; padding-top: 2px; }
+  .insight-card textarea { font-family: var(--font); font-size: 13px; background: transparent; border: none; padding: 0; color: var(--text); width: 100%; resize: none; min-height: 42px; line-height: 1.65; }
+  .insight-card textarea:focus { outline: none; }
+
+  .email-entry { border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; }
+  .email-hdr { display: grid; grid-template-columns: 1fr 1fr 1fr 30px; gap: 8px; align-items: end; padding: 10px 14px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+  .email-hdr .field { margin: 0; }
+  .email-hdr .field label { font-size: 11px; }
+  .email-hdr .field input, .email-hdr .field select { font-size: 12px; padding: 6px 8px; }
+  .email-bdy { padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .email-bdy .field { margin: 0; }
+  .email-bdy .field textarea { min-height: 60px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .field-row, .field-row.thirds { grid-template-columns: 1fr; }
+    .flag-grid { grid-template-columns: 1fr; }
+    .score-grid { grid-template-columns: repeat(2, 1fr); }
+    .spec-col-labels, .spec-row { grid-template-columns: 1fr 1fr 30px; }
+    .spec-row .field:nth-child(3) { display: none; }
+    .email-hdr { grid-template-columns: 1fr 1fr 30px; }
+    .email-hdr .field:nth-child(3) { display: none; }
+    .email-bdy { grid-template-columns: 1fr; }
+    .form-topbar { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div id="view-index" class="view active">
+  <div class="shell">
+    <div class="index-header">
+      <div>
+        <h1>Learning log</h1>
+        <p>Account case studies — <span id="count-label">0 entries</span></p>
+      </div>
+      <button class="btn-primary" onclick="newCaseStudy()">+ new case study</button>
+    </div>
+    <div id="index-list"></div>
+  </div>
+</div>
+
+<div id="view-form" class="view">
+  <div class="form-topbar">
+    <button class="btn-back" onclick="goIndex()">&#8592; all studies</button>
+    <input class="form-company-input" id="form-company-input" type="text" placeholder="Company name..." />
+    <div class="topbar-right">
+      <div class="save-status"><span class="save-dot" id="save-dot"></span><span id="save-label">unsaved</span></div>
+      <button class="btn-outline" onclick="exportCurrent()">export &#8599;</button>
+      <button class="btn-save" onclick="saveCurrent()">save</button>
+    </div>
+  </div>
+  <div class="form-body" id="form-body"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'cs_learning_log_v2';
+let studies = [];
+let currentId = null;
+let formState = {};
+
+function loadStudies() {
+  try { studies = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { studies = []; }
+}
+function saveStudies() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(studies)); } catch(e) { alert('Storage error — your browser may be blocking localStorage.'); }
+}
+
+function goIndex() {
+  document.getElementById('view-form').classList.remove('active');
+  document.getElementById('view-index').classList.add('active');
+  renderIndex();
+}
+
+function showForm(id) {
+  const found = studies.find(s => s.id === id);
+  formState = found ? JSON.parse(JSON.stringify(found)) : {
+    id: Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    company: '', date: new Date().toISOString().slice(0,10), data: {}
+  };
+  currentId = formState.id;
+  document.getElementById('view-index').classList.remove('active');
+  document.getElementById('view-form').classList.add('active');
+  buildForm(formState);
+  window.scrollTo(0, 0);
+}
+
+function newCaseStudy() { showForm(null); }
+
+function renderIndex() {
+  loadStudies();
+  const list = document.getElementById('index-list');
+  const count = studies.length;
+  document.getElementById('count-label').textContent = count + (count === 1 ? ' entry' : ' entries');
+  if (count === 0) {
+    list.innerHTML = '<div class="empty-state"><h2>No case studies yet</h2><p>Hit "new case study" to start building your learning log.</p></div>';
+    return;
+  }
+  list.innerHTML = '';
+  [...studies].reverse().forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'cs-card';
+    const flagCount = (s.data.flags || []).length;
+    const insightCount = (s.data.insights || []).filter(i => i && i.trim()).length;
+    const stages = (s.data.stages || []).join(' · ');
+    const tagsHtml = [
+      s.data.industry ? `<span class="ctag">${s.data.industry}</span>` : '',
+      s.data.maturity ? `<span class="ctag">${s.data.maturity}</span>` : '',
+      stages ? `<span class="ctag">${stages}</span>` : '',
+      flagCount ? `<span class="ctag warn">${flagCount} flag${flagCount > 1 ? 's' : ''}</span>` : ''
+    ].join('');
+    card.innerHTML = `
+      <div class="cs-card-top">
+        <div>
+          <div class="cs-card-name">${escHtml(s.company || 'Unnamed company')}</div>
+          <div class="cs-card-meta">Reviewed ${s.date || '—'} &nbsp;·&nbsp; ${insightCount} insight${insightCount === 1 ? '' : 's'}</div>
+        </div>
+        <div class="cs-card-actions">
+          <button class="btn-sm" onclick="event.stopPropagation(); showForm('${s.id}')">edit</button>
+          <button class="btn-sm danger" onclick="event.stopPropagation(); deleteStudy('${s.id}')">delete</button>
+        </div>
+      </div>
+      ${tagsHtml ? `<div class="card-tags">${tagsHtml}</div>` : ''}
+    `;
+    card.onclick = () => showForm(s.id);
+    list.appendChild(card);
+  });
+}
+
+function deleteStudy(id) {
+  if (!confirm('Delete this case study? This cannot be undone.')) return;
+  studies = studies.filter(s => s.id !== id);
+  saveStudies();
+  renderIndex();
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function markUnsaved() {
+  document.getElementById('save-dot').className = 'save-dot';
+  document.getElementById('save-label').textContent = 'unsaved';
+}
+
+function setKey(k, v) { formState.data[k] = v; markUnsaved(); }
+
+const CONTACT_TYPES = ['Engineer / designer','Purchasing / procurement','Project manager','Executive / owner','Mixed / multiple'];
+const STAGES_LIST = ['RFQ / inquiry','Quoting','PO receipt','Sales order','Production','Shipment','Invoice'];
+const STAGE_OPTS = [...STAGES_LIST, 'Internal — Ideal & China','Other'];
+const PARTY_OPTS = ['Client → Ideal','Ideal → Client','Ideal → China team','China team → Ideal','Internal — Ideal','Other'];
+const FLAGS = ['Drawing revision mismatch','Qty changed after quoting','Missing tolerances / coating spec','New contact mid-thread','Delivery tighter than lead time','"Same as last order" — no PO ref','Spec in email not on drawing','PO differs from quote','Billing / shipping address mismatch','Ambiguous magnetization direction'];
+const SCORES = [{label:'Clarity',key:'clarity'},{label:'Technical',key:'technical'},{label:'Reliability',key:'reliability'},{label:'Complexity',key:'complexity'}];
+const MODULES = ['Module 2: Reading emails','Module 3: Client intelligence','Module 4: Technical vocabulary','Module 5: Order lifecycle','Module 6: Strategic thinking'];
+const COMPANY_SIZES = ['Small (1–50)','Mid-size (51–500)','Large enterprise (500+)','Unknown'];
+const MATURITY_OPTS = ['New / first inquiry','Active — early stage','Recurring customer','Long-term established'];
+const DEMAND_OPTS = ['Steady recurring','Project-based spikes','Prototype then production','Seasonal','One-time / unclear'];
+const DRAWING_OPTS = ['Complete — all specs present','Mostly complete — minor gaps','Incomplete — key specs missing','No drawing provided','Multiple revisions submitted'];
+
+function buildForm(study) {
+  const d = study.data || {};
+  const fb = document.getElementById('form-body');
+  fb.innerHTML = '';
+
+  document.getElementById('form-company-input').value = study.company || '';
+  const isDraft = !studies.find(s => s.id === study.id);
+  document.getElementById('save-dot').className = 'save-dot' + (isDraft ? '' : ' saved');
+  document.getElementById('save-label').textContent = isDraft ? 'unsaved' : ('saved ' + (study.date || ''));
+
+  document.getElementById('form-company-input').oninput = (e) => { formState.company = e.target.value; markUnsaved(); };
+
+  function el(tag, props={}, ...children) {
+    const e = document.createElement(tag);
+    Object.entries(props).forEach(([k,v]) => {
+      if (k === 'class') e.className = v;
+      else if (k === 'style') e.style.cssText = v;
+      else if (k.startsWith('on')) e[k] = v;
+      else e.setAttribute(k, v);
+    });
+    children.forEach(c => c && e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
+    return e;
+  }
+
+  function section(label) {
+    const s = el('div', {class:'section'});
+    s.appendChild(el('div', {class:'section-label'}, label));
+    fb.appendChild(s);
+    return s;
+  }
+
+  function row(cls, ...fields) {
+    const r = el('div', {class:'field-row' + (cls ? ' ' + cls : '')});
+    fields.forEach(f => r.appendChild(f));
+    return r;
+  }
+
+  function field(labelText, inputEl) {
+    const f = el('div', {class:'field'});
+    f.appendChild(el('label', {}, labelText));
+    f.appendChild(inputEl);
+    return f;
+  }
+
+  function inp(placeholder, val, key) {
+    const i = el('input', {type:'text', placeholder});
+    i.value = val || '';
+    i.oninput = () => { if(key) setKey(key, i.value); };
+    return i;
+  }
+
+  function dateInp(val) {
+    const i = el('input', {type:'date'});
+    i.value = val || '';
+    i.oninput = () => setKey('reviewDate', i.value);
+    return i;
+  }
+
+  function selEl(opts, val, key) {
+    const s = el('select');
+    s.appendChild(el('option', {value:''}, 'select'));
+    opts.forEach(o => {
+      const opt = el('option', {}, o);
+      if (o === val) opt.selected = true;
+      s.appendChild(opt);
+    });
+    s.onchange = () => { if(key) setKey(key, s.value); };
+    return s;
+  }
+
+  function ta(placeholder, val, key, cls) {
+    const t = el('textarea', {placeholder});
+    if (cls) t.className = cls;
+    t.value = val || '';
+    t.oninput = () => { if(key) setKey(key, t.value); };
+    return t;
+  }
+
+  function tagGroup(items, selected, key) {
+    const wrap = el('div', {class:'tag-group'});
+    items.forEach(item => {
+      const t = el('span', {class:'tag' + ((selected||[]).includes(item) ? ' active' : '')}, item);
+      t.onclick = () => {
+        t.classList.toggle('active');
+        const cur = formState.data[key] || [];
+        if(t.classList.contains('active')) { if(!cur.includes(item)) cur.push(item); }
+        else { const i = cur.indexOf(item); if(i>-1) cur.splice(i,1); }
+        formState.data[key] = cur;
+        markUnsaved();
+      };
+      wrap.appendChild(t);
+    });
+    return wrap;
+  }
+
+  function stagePills(selected) {
+    const wrap = el('div', {class:'stage-pills'});
+    STAGES_LIST.forEach(item => {
+      const p = el('span', {class:'stage-pill'+((selected||[]).includes(item)?' active':'')}, item);
+      p.onclick = () => {
+        p.classList.toggle('active');
+        const cur = formState.data.stages || [];
+        if(p.classList.contains('active')) { if(!cur.includes(item)) cur.push(item); }
+        else { const i = cur.indexOf(item); if(i>-1) cur.splice(i,1); }
+        formState.data.stages = cur;
+        markUnsaved();
+      };
+      wrap.appendChild(p);
+    });
+    return wrap;
+  }
+
+  function spacer(h) { const s = el('div'); s.style.height = (h||10)+'px'; return s; }
+
+  function addBtn(label, onclick) {
+    const b = el('button', {class:'add-btn'}, label);
+    b.onclick = onclick; return b;
+  }
+
+  // ── ACCOUNT BASICS
+  const s1 = section('Account basics');
+  s1.appendChild(row('', field('Account / company name (set in top bar)', inp('reflected above', d.accountName, 'accountName')), field('Date of this review', dateInp(d.reviewDate))));
+  s1.appendChild(row('thirds', field('Industry / end application', inp('e.g. medical devices', d.industry, 'industry')), field('Company size', selEl(COMPANY_SIZES, d.companySize, 'companySize')), field('Account maturity', selEl(MATURITY_OPTS, d.maturity, 'maturity'))));
+
+  // ── WHO YOU'RE DEALING WITH
+  const s2 = section("Who you're dealing with");
+  s2.appendChild(row('', field('Primary contact name(s)', inp('e.g. James Chen, Sarah M.', d.contactNames, 'contactNames')), field('Their role(s)', inp('e.g. Senior Mechanical Engineer', d.contactRoles, 'contactRoles'))));
+  const ctWrap = el('div', {class:'field', style:'margin-bottom:12px'});
+  ctWrap.appendChild(el('label', {}, 'Contact type (select all that apply)'));
+  ctWrap.appendChild(tagGroup(CONTACT_TYPES, d.contactTypes, 'contactTypes'));
+  s2.appendChild(ctWrap);
+  s2.appendChild(row('full', field('What does their writing style tell you?', ta('e.g. Very technical — uses exact grade names, provides tolerances upfront, rarely asks about price.', d.writingStyle, 'writingStyle', 'short'))));
+
+  // ── WHAT THEY BUY
+  const s3 = section('What they buy');
+  s3.appendChild(row('full', field('Magnet type(s)', inp('e.g. NdFeB ring magnets, SmCo discs', d.magnetTypes, 'magnetTypes'))));
+
+  const colLabels = el('div', {class:'spec-col-labels'});
+  ['Grade','Coating','Typical qty / order',''].forEach(h => colLabels.appendChild(el('span', {class:'col-header'}, h)));
+  s3.appendChild(colLabels);
+
+  const specContainer = el('div');
+  specContainer.id = 'spec-container';
+  const specs = (d.specs && d.specs.length) ? d.specs : [{grade:'',coating:'',qty:''}];
+  specs.forEach(sp => addSpecRow(specContainer, sp));
+  s3.appendChild(specContainer);
+  s3.appendChild(addBtn('+ add grade / coating / qty combination', () => { addSpecRow(specContainer, {}); markUnsaved(); }));
+  s3.appendChild(spacer(14));
+  s3.appendChild(row('', field('Demand pattern', selEl(DEMAND_OPTS, d.demandPattern, 'demandPattern')), field('End product / application (best guess)', inp('e.g. servo motors for industrial automation', d.endProduct, 'endProduct'))));
+
+  // ── ORDER LIFECYCLE
+  const s4 = section('Order lifecycle — stages observed');
+  const spWrap = el('div', {class:'field', style:'margin-bottom:14px'});
+  const spLbl = el('label', {style:'margin-bottom:8px;display:block'}, 'Select all stages visible in this email set');
+  spWrap.appendChild(spLbl);
+  spWrap.appendChild(stagePills(d.stages));
+  s4.appendChild(spWrap);
+  s4.appendChild(row('full', field('Describe what happened at each stage', ta("e.g. RFQ arrived with drawing Rev B. Client changed qty to 2,000 before PO, causing a price revision...", d.lifecycleNotes, 'lifecycleNotes', 'tall'))));
+  s4.appendChild(row('', field('How long did negotiation take?', inp('e.g. ~3 weeks, 8 emails', d.negotiationTime, 'negotiationTime')), field('What finally closed the deal?', inp('e.g. Price match + confirmed lead time', d.dealCloser, 'dealCloser'))));
+
+  // ── TECHNICAL OBSERVATIONS
+  const s5 = section('Technical observations');
+  s5.appendChild(row('full', field('Technical questions / requests in emails', ta('e.g. Client asked about Br value at 80°C. Requested pull force test data. Questioned RoHS availability.', d.techQuestions, 'techQuestions'))));
+  s5.appendChild(row('', field('Drawing quality', selEl(DRAWING_OPTS, d.drawingQuality, 'drawingQuality')), field('Drawing revision situation', inp('e.g. Rev C — matched quote and PO correctly', d.drawingRev, 'drawingRev'))));
+  s5.appendChild(row('full', field('China team feedback / technical input received', ta('e.g. China team flagged OD tolerance too tight. Suggested ±0.1mm instead of ±0.05mm. Client agreed.', d.chinaFeedback, 'chinaFeedback', 'short'))));
+  s5.appendChild(row('full', field('Terms or specs you had to look up from this account', ta('e.g. Learned that diametric magnetization means poles are on flat circular faces. Looked up SH suffix meaning.', d.termsLearned, 'termsLearned', 'short'))));
+
+  // ── RED FLAGS
+  const s6 = section('Red flags spotted');
+  const flagGrid = el('div', {class:'flag-grid'});
+  FLAGS.forEach(f => {
+    const item = el('div', {class:'flag-item'+((d.flags||[]).includes(f)?' flagged':'')});
+    const check = el('div', {class:'flag-check'});
+    const txt = el('span', {class:'flag-text'}, f);
+    item.appendChild(check); item.appendChild(txt);
+    item.onclick = () => {
+      item.classList.toggle('flagged');
+      const cur = formState.data.flags || [];
+      if(item.classList.contains('flagged')) { if(!cur.includes(f)) cur.push(f); }
+      else { const i = cur.indexOf(f); if(i>-1) cur.splice(i,1); }
+      formState.data.flags = cur;
+      markUnsaved();
+    };
+    flagGrid.appendChild(item);
+  });
+  s6.appendChild(flagGrid);
+  s6.appendChild(spacer(10));
+  s6.appendChild(row('full', field('Additional flags or anomalies', ta('Anything that seemed off or worth flagging to the sales team...', d.extraFlags, 'extraFlags', 'short'))));
+
+  // ── CLIENT RATING
+  const s7 = section('Client rating');
+  const scoreGrid = el('div', {class:'score-grid'});
+  SCORES.forEach(sc => {
+    const card = el('div', {class:'score-card'});
+    card.appendChild(el('div', {class:'score-label'}, sc.label));
+    const valDiv = el('div', {class:'score-val'});
+    let cur = (d.scores || {})[sc.key] || 0;
+    for(let i = 1; i <= 5; i++) {
+      const dot = el('div', {class:'dot'+(i<=cur?' filled':'')});
+      const ii = i;
+      dot.onclick = () => {
+        cur = ii;
+        valDiv.querySelectorAll('.dot').forEach((dt,idx) => dt.classList.toggle('filled', idx < ii));
+        if(!formState.data.scores) formState.data.scores = {};
+        formState.data.scores[sc.key] = ii;
+        markUnsaved();
+      };
+      valDiv.appendChild(dot);
+    }
+    card.appendChild(valDiv);
+    scoreGrid.appendChild(card);
+  });
+  s7.appendChild(scoreGrid);
+
+  // ── KEY INSIGHTS
+  const s8 = section('Key insights');
+  const insightNote = el('p', {style:'font-size:12px;color:var(--text-secondary);margin-bottom:12px'}, '3–5 takeaways to carry forward — about this client, the product, or the process.');
+  s8.appendChild(insightNote);
+  const insightList = el('div');
+  insightList.id = 'insight-list';
+  const savedInsights = (d.insights && d.insights.length) ? d.insights : ['','',''];
+  savedInsights.forEach((v,i) => addInsight(insightList, i+1, v));
+  s8.appendChild(insightList);
+  s8.appendChild(addBtn('+ add insight', () => {
+    addInsight(insightList, insightList.children.length + 1, '');
+    syncInsights();
+    markUnsaved();
+  }));
+
+  // ── STRATEGIC QUESTIONS
+  const s9 = section('Strategic questions');
+  s9.appendChild(row('full', field('Is this account growing, stable, or declining? What signals that?', ta('e.g. Order size increased 3x over 6 months. Asking about alternative grades — new product line in development.', d.growth, 'growth', 'short'))));
+  s9.appendChild(row('full', field('What does this account reveal about client type, industry patterns, or process gaps?', ta("e.g. Purchasing agent handles all correspondence but doesn't understand specs — risk when drawing questions arise.", d.patterns, 'patterns', 'short'))));
+  s9.appendChild(row('full', field("One thing you'd do differently next time with this account", ta('e.g. Ask for operating temperature upfront — came up late and almost required a grade change after quoting.', d.nextTime, 'nextTime', 'short'))));
+
+  // ── MODULES PRACTICED
+  const s10 = section('Modules practiced');
+  const modWrap = el('div', {class:'field'});
+  modWrap.appendChild(el('label', {}, 'Which guidebook modules did this case study engage?'));
+  modWrap.appendChild(tagGroup(MODULES, d.modules, 'modules'));
+  s10.appendChild(modWrap);
+
+  // ── EMAIL LOG (last)
+  const s11 = section('Email log — by stage & party');
+  const emailNote = el('p', {style:'font-size:12px;color:var(--text-secondary);margin-bottom:14px'}, 'Record each notable email: who sent it, what stage it belongs to, and what was conveyed. Parties: Client ↔ Ideal ↔ China team.');
+  s11.appendChild(emailNote);
+  const emailList = el('div');
+  emailList.id = 'email-list';
+  const savedEmails = (d.emails && d.emails.length) ? d.emails : [{},{},{}];
+  savedEmails.forEach(e => addEmailEntry(emailList, e));
+  s11.appendChild(emailList);
+  s11.appendChild(addBtn('+ add email entry', () => { addEmailEntry(emailList, {}); syncEmails(); markUnsaved(); }));
+}
+
+function addSpecRow(container, sp) {
+  const row = document.createElement('div');
+  row.className = 'spec-row';
+  function inp(ph, v) {
+    const i = document.createElement('input');
+    i.type = 'text'; i.placeholder = ph; i.value = v || '';
+    i.oninput = () => syncSpecs();
+    return i;
+  }
+  const f1 = document.createElement('div'); f1.className = 'field'; f1.appendChild(inp('e.g. N42, N52SH', sp.grade));
+  const f2 = document.createElement('div'); f2.className = 'field'; f2.appendChild(inp('e.g. Nickel, Epoxy', sp.coating));
+  const f3 = document.createElement('div'); f3.className = 'field'; f3.appendChild(inp('e.g. 500–2,000 pcs', sp.qty));
+  const rb = document.createElement('button'); rb.className = 'remove-btn'; rb.textContent = '×';
+  rb.onclick = () => { row.remove(); syncSpecs(); };
+  row.appendChild(f1); row.appendChild(f2); row.appendChild(f3); row.appendChild(rb);
+  container.appendChild(row);
+}
+
+function syncSpecs() {
+  const c = document.getElementById('spec-container');
+  if(!c) return;
+  formState.data.specs = [...c.querySelectorAll('.spec-row')].map(r => {
+    const ins = r.querySelectorAll('input');
+    return { grade: ins[0].value, coating: ins[1].value, qty: ins[2].value };
+  });
+  markUnsaved();
+}
+
+function addInsight(container, num, val) {
+  const card = document.createElement('div'); card.className = 'insight-card';
+  const span = document.createElement('span'); span.className = 'insight-num'; span.textContent = num;
+  const t = document.createElement('textarea');
+  t.placeholder = 'e.g. This client always asks about pull force but rarely specifies their working gap.';
+  t.value = val || '';
+  t.oninput = () => syncInsights();
+  card.appendChild(span); card.appendChild(t);
+  container.appendChild(card);
+}
+
+function syncInsights() {
+  const list = document.getElementById('insight-list');
+  if(!list) return;
+  formState.data.insights = [...list.querySelectorAll('textarea')].map(t => t.value);
+  formState.data.insightCount = formState.data.insights.filter(i => i.trim()).length;
+  markUnsaved();
+}
+
+function addEmailEntry(container, e) {
+  const entry = document.createElement('div'); entry.className = 'email-entry';
+  const hdr = document.createElement('div'); hdr.className = 'email-hdr';
+
+  function fld(labelText, inputEl) {
+    const f = document.createElement('div'); f.className = 'field';
+    const l = document.createElement('label'); l.textContent = labelText;
+    f.appendChild(l); f.appendChild(inputEl); return f;
+  }
+  function selEl(opts, val) {
+    const s = document.createElement('select');
+    const def = document.createElement('option'); def.value = ''; def.textContent = 'select'; s.appendChild(def);
+    opts.forEach(o => { const opt = document.createElement('option'); opt.textContent = o; if(o===val) opt.selected=true; s.appendChild(opt); });
+    s.onchange = () => syncEmails();
+    return s;
+  }
+  function inp(ph, v) {
+    const i = document.createElement('input'); i.type='text'; i.placeholder=ph; i.value=v||'';
+    i.oninput = () => syncEmails(); return i;
+  }
+  function ta(ph, v) {
+    const t = document.createElement('textarea'); t.placeholder=ph; t.value=v||'';
+    t.oninput = () => syncEmails(); return t;
+  }
+
+  const rb = document.createElement('button'); rb.className = 'remove-btn'; rb.textContent = '×';
+  rb.onclick = () => { entry.remove(); syncEmails(); };
+
+  hdr.appendChild(fld('Date / email #', inp('e.g. Email 3, Mar 10', e.ref)));
+  hdr.appendChild(fld('Sales stage', selEl(STAGE_OPTS, e.stage)));
+  hdr.appendChild(fld('Party (from → to)', selEl(PARTY_OPTS, e.party)));
+  hdr.appendChild(rb);
+
+  const bdy = document.createElement('div'); bdy.className = 'email-bdy';
+  bdy.appendChild(fld('What was conveyed / requested', ta('e.g. Client sent Rev C drawing with updated OD tolerance. Requested quote for 1,000 pcs with Ni coating.', e.conveyed)));
+  bdy.appendChild(fld('What it reveals / your observation', ta('e.g. Tolerance tightened from ±0.1 to ±0.05 — signals higher precision application. Flag cost impact.', e.reveals)));
+
+  entry.appendChild(hdr); entry.appendChild(bdy);
+  container.appendChild(entry);
+}
+
+function syncEmails() {
+  const list = document.getElementById('email-list');
+  if(!list) return;
+  formState.data.emails = [...list.querySelectorAll('.email-entry')].map(entry => {
+    const inputs = entry.querySelectorAll('input');
+    const selects = entry.querySelectorAll('select');
+    const areas = entry.querySelectorAll('textarea');
+    return { ref: inputs[0]?.value||'', stage: selects[0]?.value||'', party: selects[1]?.value||'', conveyed: areas[0]?.value||'', reveals: areas[1]?.value||'' };
+  });
+  markUnsaved();
+}
+
+function saveCurrent() {
+  formState.company = document.getElementById('form-company-input').value;
+  formState.date = new Date().toISOString().slice(0,10);
+  syncSpecs(); syncInsights(); syncEmails();
+  const idx = studies.findIndex(s => s.id === formState.id);
+  if(idx > -1) studies[idx] = JSON.parse(JSON.stringify(formState));
+  else studies.push(JSON.parse(JSON.stringify(formState)));
+  saveStudies();
+  document.getElementById('save-dot').className = 'save-dot saved';
+  document.getElementById('save-label').textContent = 'saved ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+function exportCurrent() {
+  syncSpecs(); syncInsights(); syncEmails();
+  const lines = ['ACCOUNT CASE STUDY — ' + (formState.company || 'Unnamed') + '\nDate: ' + (formState.date || '') + '\n'];
+  const d = formState.data;
+  const kv = (lbl, val) => { if(val && String(val).trim()) lines.push(lbl + ':\n' + val + '\n'); };
+  kv('Industry', d.industry); kv('Company size', d.companySize); kv('Account maturity', d.maturity);
+  kv('Contacts', d.contactNames); kv('Roles', d.contactRoles);
+  if(d.contactTypes && d.contactTypes.length) kv('Contact types', d.contactTypes.join(', '));
+  kv('Writing style observations', d.writingStyle);
+  kv('Magnet types', d.magnetTypes);
+  if(d.specs) d.specs.forEach((s,i) => { const parts=[s.grade,s.coating,s.qty].filter(Boolean); if(parts.length) kv('Spec '+(i+1), parts.join(' | ')); });
+  kv('Demand pattern', d.demandPattern); kv('End product / application', d.endProduct);
+  if(d.stages && d.stages.length) kv('Stages observed', d.stages.join(', '));
+  kv('Lifecycle notes', d.lifecycleNotes); kv('Negotiation time', d.negotiationTime); kv('Deal closer', d.dealCloser);
+  kv('Technical questions', d.techQuestions); kv('Drawing quality', d.drawingQuality); kv('Drawing revision', d.drawingRev);
+  kv('China team feedback', d.chinaFeedback); kv('Terms learned', d.termsLearned);
+  if(d.flags && d.flags.length) kv('Red flags', d.flags.join(', '));
+  kv('Extra flags', d.extraFlags);
+  kv('Growth signals', d.growth); kv('Patterns / gaps', d.patterns); kv('Next time', d.nextTime);
+  if(d.insights) d.insights.filter(Boolean).forEach((ins,i) => kv('Insight '+(i+1), ins));
+  if(d.modules && d.modules.length) kv('Modules practiced', d.modules.join(', '));
+  if(d.emails) d.emails.forEach((e,i) => {
+    if(e.conveyed || e.reveals) {
+      const header = 'Email '+(i+1)+(e.ref?' ('+e.ref+')':'')+(e.stage?' — '+e.stage:'')+(e.party?' ['+e.party+']':'');
+      kv(header, [e.conveyed, e.reveals ? '→ Observation: '+e.reveals : ''].filter(Boolean).join('\n'));
+    }
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (formState.company || 'case_study').replace(/[^a-zA-Z0-9]/g,'_') + '_' + (formState.date||'export') + '.txt';
+  a.click();
+}
+
+loadStudies();
+renderIndex();
+</script>
+</body>
+</html>
